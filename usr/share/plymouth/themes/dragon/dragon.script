@@ -1,0 +1,22 @@
+function Pad(num, size) {
+    num_str = num.toString();
+    while (num_str.length < size) {
+        num_str = "0" + num_str;
+    }
+    return num_str;
+}
+
+function draw_animation() {
+    image_count = 24;
+    while (true) {
+        for (i = 0; i < image_count; i++) {
+            image = Image(ImageDir + "/frame_" + Pad(i, 3) + ".png");
+            image.SetPosition((Window.GetWidth() - image.GetWidth()) / 2,
+                              (Window.GetHeight() - image.GetHeight()) / 2);
+            image.Show();
+            Plymouth.Sleep(0.04);
+            image.Hide();
+        }
+    }
+}
+draw_animation();
