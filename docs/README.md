@@ -19,7 +19,12 @@
 ## 🚀 Quick Install
 
 ```bash
-sudo wget -qO - https://yourdomain.com/dragon-boot/install.sh | bash
+# Install with wget
+sudo wget -qO- https://raw.githubusercontent.com/statikfintechllc/dragon-boot/master/scripts/install.script | bash
+```
+```bash
+# Or with curl
+sudo curl -fsSL https://raw.githubusercontent.com/statikfintechllc/dragon-boot/master/scripts/install.script | bash
 ```
 
 > ℹ️ Requires sudo access. Safe to run on any Linux distro with GRUB and Plymouth.
