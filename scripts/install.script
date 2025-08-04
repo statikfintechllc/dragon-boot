@@ -1,32 +1,34 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
-# Change this to your actual tar.gz bundle URL
-BOOT_URL="https://example.com/dragon-boot.tar.gz"
-
-echo "[🐉] Downloading Dragon Boot Theme Package..."
-mkdir -p /tmp/dragon-boot
-cd /tmp/dragon-boot
-
+if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
+    REMOTE_INSTALL=true
+    REPO_DIR="$HOME/dragon-boot"
+    echo "🌐 Remote installation detected - will install repository to $REPO_DIR"
+    
 # 🔧 Dependency Check
-echo "[🔍] Checking for required packages..."
-if command -v apt &>/dev/null; then
-    sudo apt update
-    sudo apt install -y plymouth plymouth-themes grub2-common
-elif command -v pacman &>/dev/null; then
-    sudo pacman -Sy --noconfirm plymouth grub
-elif command -v dnf &>/dev/null; then
-    sudo dnf install -y plymouth grub2
-else
-    echo "❌ Unsupported package manager. Install dependencies manually."
-    exit 1
-fi
+   echo "[🔍] Checking for required packages..."
+   if command -v apt &>/dev/null; then
+       sudo apt update
+       sudo apt install -y plymouth plymouth-themes grub2-common
+   elif command -v pacman &>/dev/null; then
+       sudo pacman -Sy --noconfirm plymouth grub
+   elif command -v dnf &>/dev/null; then
+       sudo dnf install -y plymouth grub2
+   else
+       echo "❌ Unsupported package manager. Install dependencies manually."
+       exit 1
+   fi
+    # Clone the repository if not already present
+    if [[ ! -d "$REPO_DIR/.git" ]]; then
+        git clone https://github.com/statikfintechllc/Gremlin-ShadTail-Trader.git "$REPO_DIR"
+    else
+        echo "🔄 Updating existing repository..."
+        cd "$REPO_DIR"
+        git pull origin master
+    fi
 
-# Download and extract
-wget -q --show-progress "$BOOT_URL" -O dragon-boot.tar.gz
-echo "[📦] Extracting dragon-boot.tar.gz..."
-tar -xzf dragon-boot.tar.gz
 cd dragon-boot
 
 echo "[🔧] Installing Dragon Boot Theme..."
@@ -57,7 +59,7 @@ echo "[⚙️] Patching /etc/default/grub..."
 sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3 fbcon=map:1 gfxpayload=keep video=efifb bgrt_disable"/' /etc/default/grub
 
 if ! grep -q "^GRUB_GFXMODE=" /etc/default/grub; then
-    echo 'GRUB_GFXMODE=1920x1080' | sudo tee -a /etc/default/grub
+    echo 'GRUB_GFXMODE=1800x1200' | sudo tee -a /etc/default/grub
 else
     sudo sed -i 's/^GRUB_GFXMODE=.*/GRUB_GFXMODE=1920x1080/' /etc/default/grub
 fi
