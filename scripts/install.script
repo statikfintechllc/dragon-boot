@@ -22,7 +22,7 @@ if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
    fi
     # Clone the repository if not already present
     if [[ ! -d "$REPO_DIR/.git" ]]; then
-        git clone https://github.com/statikfintechllc/Gremlin-ShadTail-Trader.git "$REPO_DIR"
+        git clone https://github.com/statikfintechllc/dragon-boot.git "$REPO_DIR"
     else
         echo "🔄 Updating existing repository..."
         cd "$REPO_DIR"
@@ -79,8 +79,9 @@ echo "[✅] Dragon Boot Theme Installed Successfully!"
 
 read -rp $'\n[🚀] Reboot now to apply changes? [y/N]: ' confirm
 if [[ "$confirm" =~ ^[Yy]$ ]]; then
-    echo "[♻️] Rebooting..."
-    sudo reboot
-else
+   echo "[♻️] Rebooting..."
+   sudo reboot
+  else
     echo "[⏭️] Reboot skipped. Please reboot manually to see your dragon."
+  fi
 fi
