@@ -70,6 +70,11 @@ if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
         sudo sed -i 's/^GRUB_GFXPAYLOAD_LINUX=.*/GRUB_GFXPAYLOAD_LINUX=keep/' /etc/default/grub || { echo "❌ Failed to update GRUB_GFXPAYLOAD_LINUX"; exit 1; }
     fi
 
+    # Register and set the default Plymouth theme
+    echo "[🛠️] Registering and setting default Plymouth theme to dragon..."
+    sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth /usr/share/plymouth/themes/dragon/dragon.plymouth 100 || { echo "❌ Failed to register Plymouth theme"; exit 1; }
+    echo '/usr/share/plymouth/themes/dragon/dragon.plymouth' | sudo update-alternatives --set default.plymouth /dev/stdin || sudo update-alternatives --set default.plymouth /usr/share/plymouth/themes/dragon/dragon.plymouth || { echo "❌ Failed to set default Plymouth theme"; exit 1; }
+
     # Update GRUB and initramfs
     echo "[🔄] Updating bootloader and initramfs..."
     sudo update-grub || { echo "❌ update-grub failed"; exit 1; }
