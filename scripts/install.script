@@ -10,12 +10,12 @@ if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
     # 🔧 Dependency Check
     echo "[🔍] Checking for required packages..."
     if command -v apt &>/dev/null; then
-        sudo apt update
-        sudo apt install -y plymouth plymouth-themes grub2-common
+        sudo apt update || { echo "❌ apt update failed"; exit 1; }
+        sudo apt install -y plymouth plymouth-themes grub2-common || { echo "❌ apt install failed"; exit 1; }
     elif command -v pacman &>/dev/null; then
-        sudo pacman -Sy --noconfirm plymouth grub
+        sudo pacman -Sy --noconfirm plymouth grub || { echo "❌ pacman install failed"; exit 1; }
     elif command -v dnf &>/dev/null; then
-        sudo dnf install -y plymouth grub2
+        sudo dnf install -y plymouth grub2 || { echo "❌ dnf install failed"; exit 1; }
     else
         echo "❌ Unsupported package manager. Install dependencies manually."
         exit 1
@@ -23,63 +23,62 @@ if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
 
     # Clone the repository if not already present
     if [[ ! -d "$REPO_DIR/.git" ]]; then
-        git clone https://github.com/statikfintechllc/dragon-boot.git "$REPO_DIR"
+        git clone https://github.com/statikfintechllc/dragon-boot.git "$REPO_DIR" || { echo "❌ Git clone failed"; exit 1; }
     else
         echo "🔄 Updating existing repository..."
-        cd "$REPO_DIR"
-        git pull origin master
+        cd "$REPO_DIR" || { echo "❌ Failed to cd to $REPO_DIR"; exit 1; }
+        git pull origin master || { echo "❌ Git pull failed"; exit 1; }
     fi
 
-    cd "$REPO_DIR"
+    cd "$REPO_DIR" || { echo "❌ Failed to cd to $REPO_DIR"; exit 1; }
 
     echo "[🔧] Installing Dragon Boot Theme..."
 
     # Ensure structure is valid
     if [ ! -d "frames" ] || [ ! -f "usr/share/plymouth/themes/dragon/dragon.plymouth" ]; then
-        echo "❌ Invalid theme directory structure. Install failed."
+        echo "❌ Invalid theme directory structure. Install failed. Check contents of $REPO_DIR."
+        ls -R . || echo "❌ Could not list directory contents."
         exit 1
     fi
 
     # Copy frame PNGs
     echo "[📦] Copying frame assets to /usr/share/plymouth/themes/dragon"
-    sudo mkdir -p /usr/share/plymouth/themes/dragon
-    sudo cp frames/frame_*.png /usr/share/plymouth/themes/dragon/
+    sudo mkdir -p /usr/share/plymouth/themes/dragon || { echo "❌ Failed to create theme directory"; exit 1; }
+    sudo cp -v frames/frame_*.png /usr/share/plymouth/themes/dragon/ || { echo "❌ Failed to copy frame assets"; ls frames/ || echo "❌ Frame directory empty or inaccessible."; exit 1; }
 
     # Copy plymouth theme files
     echo "[📜] Copying plymouth theme definition and script"
-    sudo cp usr/share/plymouth/themes/dragon/*.plymouth /usr/share/plymouth/themes/dragon/
-    sudo cp usr/share/plymouth/themes/dragon/*.script /usr/share/plymouth/themes/dragon/
+    sudo cp -v usr/share/plymouth/themes/dragon/*.plymouth /usr/share/plymouth/themes/dragon/ || { echo "❌ Failed to copy plymouth files"; ls usr/share/plymouth/themes/dragon/ || echo "❌ Plymouth theme files missing."; exit 1; }
+    sudo cp -v usr/share/plymouth/themes/dragon/*.script /usr/share/plymouth/themes/dragon/ || { echo "❌ Failed to copy script files"; ls usr/share/plymouth/themes/dragon/ || echo "❌ Script files missing."; exit 1; }
 
     # Copy plymouthd.conf
     echo "[🗂️] Setting plymouthd.conf to use dragon theme"
-    sudo mkdir -p /etc/plymouth
-    sudo cp etc/plymouth/plymouthd.conf /etc/plymouth/plymouthd.conf
+    sudo mkdir -p /etc/plymouth || { echo "❌ Failed to create plymouth config directory"; exit 1; }
+    sudo cp -v etc/plymouth/plymouthd.conf /etc/plymouth/plymouthd.conf || { echo "❌ Failed to copy plymouthd.conf"; ls etc/plymouth/ || echo "❌ plymouthd.conf missing."; exit 1; }
 
     # Patch /etc/default/grub
     echo "[⚙️] Patching /etc/default/grub..."
-    sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3 fbcon=map:1 gfxpayload=keep video=efifb bgrt_disable"/' /etc/default/grub
-
+    sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3 fbcon=map:1 gfxpayload=keep video=efifb bgrt_disable"/' /etc/default/grub || { echo "❌ Failed to patch GRUB_CMDLINE"; exit 1; }
     if ! grep -q "^GRUB_GFXMODE=" /etc/default/grub; then
-        echo 'GRUB_GFXMODE=1800x1200' | sudo tee -a /etc/default/grub
+        echo 'GRUB_GFXMODE=1800x1200' | sudo tee -a /etc/default/grub || { echo "❌ Failed to set GRUB_GFXMODE"; exit 1; }
     else
-        sudo sed -i 's/^GRUB_GFXMODE=.*/GRUB_GFXMODE=1920x1080/' /etc/default/grub
+        sudo sed -i 's/^GRUB_GFXMODE=.*/GRUB_GFXMODE=1920x1080/' /etc/default/grub || { echo "❌ Failed to update GRUB_GFXMODE"; exit 1; }
     fi
-
     if ! grep -q "^GRUB_GFXPAYLOAD_LINUX=" /etc/default/grub; then
-        echo 'GRUB_GFXPAYLOAD_LINUX=keep' | sudo tee -a /etc/default/grub
+        echo 'GRUB_GFXPAYLOAD_LINUX=keep' | sudo tee -a /etc/default/grub || { echo "❌ Failed to set GRUB_GFXPAYLOAD_LINUX"; exit 1; }
     else
-        sudo sed -i 's/^GRUB_GFXPAYLOAD_LINUX=.*/GRUB_GFXPAYLOAD_LINUX=keep/' /etc/default/grub
+        sudo sed -i 's/^GRUB_GFXPAYLOAD_LINUX=.*/GRUB_GFXPAYLOAD_LINUX=keep/' /etc/default/grub || { echo "❌ Failed to update GRUB_GFXPAYLOAD_LINUX"; exit 1; }
     fi
 
     # Update GRUB and initramfs
     echo "[🔄] Updating bootloader and initramfs..."
-    sudo update-grub
-    sudo update-initramfs -u -v || echo "ℹ️ Skipped initramfs update (not available on this distro)"
+    sudo update-grub || { echo "❌ update-grub failed"; exit 1; }
+    sudo update-initramfs -u -v || { echo "❌ update-initramfs failed"; exit 1; }
 
     echo "[✅] Dragon Boot Theme Installed Successfully!"
-fi  # End of remote install block
+fi
 
-# Reboot prompt (moved outside the if block)
+# Reboot prompt
 read -rp $'\n[🚀] Reboot now to apply changes? [y/N]: ' confirm
 if [[ "$confirm" =~ ^[Yy]$ ]]; then
     echo "[♻️] Rebooting..."
