@@ -35,7 +35,7 @@ if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
     echo "[🔧] Installing Dragon Boot Theme..."
 
     # Ensure structure is valid
-    if [ ! -d "frames" ] || [ ! -f "usr/share/plymouth/themes/dragon/dragon.plymouth" ]; then
+    if [ ! -d "frames" ] || [ ! -f "usr/share/plymouth/dragon/dragon.plymouth" ]; then
         echo "❌ Invalid theme directory structure. Install failed. Check contents of $REPO_DIR."
         ls -R . || echo "❌ Could not list directory contents."
         exit 1
@@ -48,7 +48,7 @@ if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
 
     # Copy plymouth theme files
     echo "[📜] Copying plymouth theme definition and script"
-    sudo cp -v usr/share/plymouth/themes/dragon/*.plymouth /usr/share/plymouth/themes/dragon/ || { echo "❌ Failed to copy plymouth files"; ls usr/share/plymouth/themes/dragon/ || echo "❌ Plymouth theme files missing."; exit 1; }
+    sudo cp -v usr/share/plymouth/dragon/*.plymouth /usr/share/plymouth/themes/dragon/ || { echo "❌ Failed to copy plymouth files"; ls usr/share/plymouth/dragon/ || echo "❌ Plymouth theme files missing."; exit 1; }
     sudo cp -v usr/share/plymouth/themes/dragon/*.script /usr/share/plymouth/themes/dragon/ || { echo "❌ Failed to copy script files"; ls usr/share/plymouth/themes/dragon/ || echo "❌ Script files missing."; exit 1; }
 
     # Copy plymouthd.conf
