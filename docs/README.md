@@ -128,6 +128,8 @@ href="https://github.com/statikfintechllc/GremlinGPT/blob/master/docs/GREMLINGPT
 
 ## 🚀 Quick Install
 
+**One-command installation - just copy, paste, and reboot!**
+
 ```bash
 # Install with wget
 sudo wget -qO- https://raw.githubusercontent.com/statikfintechllc/dragon-boot/master/scripts/install.script | bash
@@ -137,10 +139,22 @@ sudo wget -qO- https://raw.githubusercontent.com/statikfintechllc/dragon-boot/ma
 sudo curl -fsSL https://raw.githubusercontent.com/statikfintechllc/dragon-boot/master/scripts/install.script | bash
 ```
 
+**What happens:**
+1. 📦 Downloads and installs all theme files
+2. ⚙️ Configures GRUB bootloader settings  
+3. 🎨 Sets dragon as your default Plymouth theme
+4. 🔄 Updates initramfs and GRUB configuration
+5. 🚀 **Prompts you to reboot** - choose Y to reboot now, or N to reboot later
+
 > [!IMPORTANT]
 >
-> Requires sudo access.
-> Safe to run on any Linux distro with GRUB and Plymouth.
+> - Requires sudo access
+> - Safe to run on any Linux distro with GRUB and Plymouth
+> - **You MUST reboot after installation to see the boot animation**
+
+> [!TIP]
+>
+> **Testing without reboot:** Run `sudo ~/dragon-boot/scripts/test-theme.sh` for a preview
 
 ---
 

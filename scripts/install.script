@@ -58,11 +58,19 @@ if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
 
     # Patch /etc/default/grub
     echo "[⚙️] Patching /etc/default/grub..."
-    sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3 fbcon=map:1 gfxpayload=keep video=efifb bgrt_disable"/' /etc/default/grub || { echo "❌ Failed to patch GRUB_CMDLINE"; exit 1; }
+    
+    # Remove any debug flags that would show text instead of splash
+    sudo sed -i 's/plymouth\.debug//g' /etc/default/grub || true
+    sudo sed -i 's/plymouth:debug//g' /etc/default/grub || true
+    
+    # Set main command line parameters
+    sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3 fbcon=map:1 gfxpayload=keep video=efifb"/' /etc/default/grub || { echo "❌ Failed to patch GRUB_CMDLINE"; exit 1; }
+    
+    # Set compatible graphics mode
     if ! grep -q "^GRUB_GFXMODE=" /etc/default/grub; then
-        echo 'GRUB_GFXMODE=1800x1200' | sudo tee -a /etc/default/grub || { echo "❌ Failed to set GRUB_GFXMODE"; exit 1; }
+        echo 'GRUB_GFXMODE=1024x768' | sudo tee -a /etc/default/grub || { echo "❌ Failed to set GRUB_GFXMODE"; exit 1; }
     else
-        sudo sed -i 's/^GRUB_GFXMODE=.*/GRUB_GFXMODE=1920x1080/' /etc/default/grub || { echo "❌ Failed to update GRUB_GFXMODE"; exit 1; }
+        sudo sed -i 's/^GRUB_GFXMODE=.*/GRUB_GFXMODE=1024x768/' /etc/default/grub || { echo "❌ Failed to update GRUB_GFXMODE"; exit 1; }
     fi
     if ! grep -q "^GRUB_GFXPAYLOAD_LINUX=" /etc/default/grub; then
         echo 'GRUB_GFXPAYLOAD_LINUX=keep' | sudo tee -a /etc/default/grub || { echo "❌ Failed to set GRUB_GFXPAYLOAD_LINUX"; exit 1; }
@@ -73,7 +81,18 @@ if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
     # Register and set the default Plymouth theme
     echo "[🛠️] Registering and setting default Plymouth theme to dragon..."
     sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth /usr/share/plymouth/themes/dragon/dragon.plymouth 100 || { echo "❌ Failed to register Plymouth theme"; exit 1; }
-    echo '/usr/share/plymouth/themes/dragon/dragon.plymouth' | sudo update-alternatives --set default.plymouth /dev/stdin || sudo update-alternatives --set default.plymouth /usr/share/plymouth/themes/dragon/dragon.plymouth || { echo "❌ Failed to set default Plymouth theme"; exit 1; }
+    sudo update-alternatives --set default.plymouth /usr/share/plymouth/themes/dragon/dragon.plymouth || { echo "❌ Failed to set default Plymouth theme"; exit 1; }
+
+    # Verify theme installation
+    echo "[🔍] Verifying theme installation..."
+    current_theme_path=$(sudo update-alternatives --query default.plymouth | grep "^Value:" | cut -d' ' -f2)
+    if [[ "$current_theme_path" == *"dragon"* ]]; then
+        echo "✅ Dragon theme successfully set as default"
+    else
+        echo "❌ Failed to verify theme installation"
+        echo "Current theme: $current_theme_path"
+        exit 1
+    fi
 
     # Update GRUB and initramfs
     echo "[🔄] Updating bootloader and initramfs..."
@@ -81,6 +100,14 @@ if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
     sudo update-initramfs -u -v || { echo "❌ update-initramfs failed"; exit 1; }
 
     echo "[✅] Dragon Boot Theme Installed Successfully!"
+    echo ""
+    echo "🧪 To test the theme without rebooting, run:"
+    echo "   sudo $REPO_DIR/scripts/test-theme.sh"
+    echo ""
+    echo "🐛 If you experience issues:"
+    echo "   1. Check Plymouth logs: sudo journalctl -b | grep plymouth"
+    echo "   2. Test theme preview: sudo plymouthd --debug --no-daemon"
+    echo "   3. Verify graphics drivers are properly installed"
 fi
 
 # Reboot prompt
