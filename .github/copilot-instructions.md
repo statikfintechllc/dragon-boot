@@ -83,9 +83,9 @@ dragon-boot/
 ├── scripts/
 │   ├── install.script         # Main installation script (users run this)
 │   └── verify-install-flow.sh # Validation and testing script
-├── usr/share/plymouth/dragon/ # Plymouth theme files
-│   ├── dragon.plymouth        # Theme definition
-│   └── dragon.script          # Animation script (JavaScript-like syntax)
+├── usr/share/plymouth/themes/dragon/ # Plymouth theme files
+│   ├── dragon.plymouth               # Theme definition
+│   └── dragon.script                 # Animation script (JavaScript-like syntax)
 ├── etc/plymouth/
 │   └── plymouthd.conf        # Plymouth daemon configuration
 └── LICENSE                   # MIT license
