@@ -1,120 +1,62 @@
 #!/usr/bin/env bash
-
+# Dragon Boot Theme Installer for Ubuntu 22.04 (Plymouth, UEFI, GRUB)
 set -e
-
+# --- Always use script directory as base ---
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")" && pwd)"
+cd "$SCRIPT_DIR/.."
+# --- Remote install logic ---
 if [[ ! -f "$0" || "$0" == "bash" || "$0" == "/dev/fd/63" ]]; then
     REMOTE_INSTALL=true
     REPO_DIR="$HOME/dragon-boot"
     echo "🌐 Remote installation detected - will install repository to $REPO_DIR"
-    
-    # 🔧 Dependency Check
-    echo "[🔍] Checking for required packages..."
-    if command -v apt &>/dev/null; then
-        sudo apt update || { echo "❌ apt update failed"; exit 1; }
-        sudo apt install -y plymouth plymouth-themes grub2-common || { echo "❌ apt install failed"; exit 1; }
-    elif command -v pacman &>/dev/null; then
-        sudo pacman -Sy --noconfirm plymouth grub || { echo "❌ pacman install failed"; exit 1; }
-    elif command -v dnf &>/dev/null; then
-        sudo dnf install -y plymouth grub2 || { echo "❌ dnf install failed"; exit 1; }
-    else
-        echo "❌ Unsupported package manager. Install dependencies manually."
-        exit 1
-    fi
-
-    # Clone the repository if not already present
+    # Dependency check
+    sudo apt update
+    sudo apt install -y git plymouth plymouth-themes grub2-common
+    # Clone or update repo
     if [[ ! -d "$REPO_DIR/.git" ]]; then
         git clone https://github.com/statikfintechllc/dragon-boot.git "$REPO_DIR" || { echo "❌ Git clone failed"; exit 1; }
     else
         echo "🔄 Updating existing repository..."
-        cd "$REPO_DIR" || { echo "❌ Failed to cd to $REPO_DIR"; exit 1; }
-        git pull origin master || { echo "❌ Git pull failed"; exit 1; }
+        cd "$REPO_DIR" && git pull origin master || { echo "❌ Git pull failed"; exit 1; }
     fi
-
-    cd "$REPO_DIR" || { echo "❌ Failed to cd to $REPO_DIR"; exit 1; }
-
-    echo "[🔧] Installing Dragon Boot Theme..."
-
-    # Ensure structure is valid
-    if [ ! -d "frames" ] || [ ! -f "usr/share/plymouth/dragon/dragon.plymouth" ]; then
-        echo "❌ Invalid theme directory structure. Install failed. Check contents of $REPO_DIR."
-        ls -R . || echo "❌ Could not list directory contents."
-        exit 1
-    fi
-
-    # Copy frame PNGs
-    echo "[📦] Copying frame assets to /usr/share/plymouth/themes/dragon"
-    sudo mkdir -p /usr/share/plymouth/themes/dragon || { echo "❌ Failed to create theme directory"; exit 1; }
-    sudo cp -v frames/frame_*.png /usr/share/plymouth/themes/dragon/ || { echo "❌ Failed to copy frame assets"; ls frames/ || echo "❌ Frame directory empty or inaccessible."; exit 1; }
-
-    # Copy plymouth theme files
-    echo "[📜] Copying plymouth theme definition and script"
-    sudo cp -v usr/share/plymouth/dragon/*.plymouth /usr/share/plymouth/themes/dragon/ || { echo "❌ Failed to copy plymouth files"; ls usr/share/plymouth/dragon/ || echo "❌ Plymouth theme files missing."; exit 1; }
-    sudo cp -v usr/share/plymouth/themes/dragon/*.script /usr/share/plymouth/themes/dragon/ || { echo "❌ Failed to copy script files"; ls usr/share/plymouth/themes/dragon/ || echo "❌ Script files missing."; exit 1; }
-
-    # Copy plymouthd.conf
-    echo "[🗂️] Setting plymouthd.conf to use dragon theme"
-    sudo mkdir -p /etc/plymouth || { echo "❌ Failed to create plymouth config directory"; exit 1; }
-    sudo cp -v etc/plymouth/plymouthd.conf /etc/plymouth/plymouthd.conf || { echo "❌ Failed to copy plymouthd.conf"; ls etc/plymouth/ || echo "❌ plymouthd.conf missing."; exit 1; }
-
-    # Patch /etc/default/grub
-    echo "[⚙️] Patching /etc/default/grub..."
-    
-    # Remove any debug flags that would show text instead of splash
-    sudo sed -i 's/plymouth\.debug//g' /etc/default/grub || true
-    sudo sed -i 's/plymouth:debug//g' /etc/default/grub || true
-    
-    # Set main command line parameters
-    sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3 fbcon=map:1 gfxpayload=keep video=efifb"/' /etc/default/grub || { echo "❌ Failed to patch GRUB_CMDLINE"; exit 1; }
-    
-    # Set compatible graphics mode
-    if ! grep -q "^GRUB_GFXMODE=" /etc/default/grub; then
-        echo 'GRUB_GFXMODE=1024x768' | sudo tee -a /etc/default/grub || { echo "❌ Failed to set GRUB_GFXMODE"; exit 1; }
-    else
-        sudo sed -i 's/^GRUB_GFXMODE=.*/GRUB_GFXMODE=1024x768/' /etc/default/grub || { echo "❌ Failed to update GRUB_GFXMODE"; exit 1; }
-    fi
-    if ! grep -q "^GRUB_GFXPAYLOAD_LINUX=" /etc/default/grub; then
-        echo 'GRUB_GFXPAYLOAD_LINUX=keep' | sudo tee -a /etc/default/grub || { echo "❌ Failed to set GRUB_GFXPAYLOAD_LINUX"; exit 1; }
-    else
-        sudo sed -i 's/^GRUB_GFXPAYLOAD_LINUX=.*/GRUB_GFXPAYLOAD_LINUX=keep/' /etc/default/grub || { echo "❌ Failed to update GRUB_GFXPAYLOAD_LINUX"; exit 1; }
-    fi
-
-    # Register and set the default Plymouth theme
-    echo "[🛠️] Registering and setting default Plymouth theme to dragon..."
-    sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth /usr/share/plymouth/themes/dragon/dragon.plymouth 100 || { echo "❌ Failed to register Plymouth theme"; exit 1; }
-    sudo update-alternatives --set default.plymouth /usr/share/plymouth/themes/dragon/dragon.plymouth || { echo "❌ Failed to set default Plymouth theme"; exit 1; }
-
-    # Verify theme installation
-    echo "[🔍] Verifying theme installation..."
-    current_theme_path=$(sudo update-alternatives --query default.plymouth | grep "^Value:" | cut -d' ' -f2)
-    if [[ "$current_theme_path" == *"dragon"* ]]; then
-        echo "✅ Dragon theme successfully set as default"
-    else
-        echo "❌ Failed to verify theme installation"
-        echo "Current theme: $current_theme_path"
-        exit 1
-    fi
-
-    # Update GRUB and initramfs
-    echo "[🔄] Updating bootloader and initramfs..."
-    sudo update-grub || { echo "❌ update-grub failed"; exit 1; }
-    sudo update-initramfs -u -v || { echo "❌ update-initramfs failed"; exit 1; }
-
-    echo "[✅] Dragon Boot Theme Installed Successfully!"
-    echo ""
-    echo "🧪 To test the theme without rebooting, run:"
-    echo "   sudo $REPO_DIR/scripts/test-theme.sh"
-    echo ""
-    echo "🐛 If you experience issues:"
-    echo "   1. Check Plymouth logs: sudo journalctl -b | grep plymouth"
-    echo "   2. Test theme preview: sudo plymouthd --debug --no-daemon"
-    echo "   3. Verify graphics drivers are properly installed"
+    cd "$REPO_DIR"
 fi
-
-# Reboot prompt
-read -rp $'\n[🚀] Reboot now to apply changes? [y/N]: ' confirm
-if [[ "$confirm" =~ ^[Yy]$ ]]; then
-    echo "[♻️] Rebooting..."
-    sudo reboot
+echo "[🔧] Installing Dragon Boot Theme for Ubuntu 22.04..."
+# 1. Ensure dependencies
+sudo apt update
+sudo apt install -y plymouth plymouth-themes grub2-common
+# 2. Copy frame PNGs and theme files
+sudo mkdir -p /usr/share/plymouth/themes/dragon
+sudo cp -v frames/frame_*.png /usr/share/plymouth/themes/dragon/
+sudo cp -v usr/share/plymouth/dragon/*.plymouth /usr/share/plymouth/themes/dragon/
+sudo cp -v usr/share/plymouth/dragon/*.script /usr/share/plymouth/themes/dragon/
+# 3. Set theme in plymouthd.conf
+sudo mkdir -p /etc/plymouth
+sudo cp -v etc/plymouth/plymouthd.conf /etc/plymouth/plymouthd.conf
+# 4. Patch /etc/default/grub for splash and graphics
+sudo sed -i 's/plymouth\.debug//g' /etc/default/grub || true
+sudo sed -i 's/plymouth:debug//g' /etc/default/grub || true
+sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3 fbcon=map:1 gfxpayload=keep video=efifb"/' /etc/default/grub
+if ! grep -q "^GRUB_GFXMODE=" /etc/default/grub; then
+    echo 'GRUB_GFXMODE=1024x768' | sudo tee -a /etc/default/grub
 else
-    echo "[⏭️] Reboot skipped. Please reboot manually to see your dragon."
+    sudo sed -i 's/^GRUB_GFXMODE=.*/GRUB_GFXMODE=1024x768/' /etc/default/grub
 fi
+if ! grep -q "^GRUB_GFXPAYLOAD_LINUX=" /etc/default/grub; then
+    echo 'GRUB_GFXPAYLOAD_LINUX=keep' | sudo tee -a /etc/default/grub
+else
+    sudo sed -i 's/^GRUB_GFXPAYLOAD_LINUX=.*/GRUB_GFXPAYLOAD_LINUX=keep/' /etc/default/grub
+fi
+# 5. Register and set the default Plymouth theme
+sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth /usr/share/plymouth/themes/dragon/dragon.plymouth 100
+sudo update-alternatives --set default.plymouth /usr/share/plymouth/themes/dragon/dragon.plymouth
+# 6. Update GRUB and initramfs
+sudo update-grub
+sudo update-initramfs -u -v
+echo "[✅] Dragon Boot Theme Installed Successfully!"
+echo "[🚨] If you still do not see the splash, check your UEFI/BIOS settings:"
+echo "      - Disable Secure Boot (it can block unsigned themes)"
+echo "      - Set boot mode to UEFI, not Legacy/CSM"
+echo "      - Make sure graphics drivers are installed and working"
+echo "      - If you see only text, your GPU or framebuffer may not be supported by Plymouth"
+echo "[ℹ️] Reboot to see your dragon!"
