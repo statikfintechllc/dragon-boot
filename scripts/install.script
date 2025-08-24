@@ -53,6 +53,7 @@ sudo update-alternatives --set default.plymouth /usr/share/plymouth/themes/drago
 # 6. Update GRUB and initramfs
 sudo update-grub
 sudo update-initramfs -u -v
+
 echo "[✅] Dragon Boot Theme Installed Successfully!"
 echo "[🚨] If you still do not see the splash, check your UEFI/BIOS settings:"
 echo "      - Disable Secure Boot (it can block unsigned themes)"
@@ -60,3 +61,12 @@ echo "      - Set boot mode to UEFI, not Legacy/CSM"
 echo "      - Make sure graphics drivers are installed and working"
 echo "      - If you see only text, your GPU or framebuffer may not be supported by Plymouth"
 echo "[ℹ️] Reboot to see your dragon!"
+
+# Prompt for reboot
+read -rp $'\n[🚀] Reboot now to apply changes? [y/N]: ' confirm
+if [[ "$confirm" =~ ^[Yy]$ ]]; then
+    echo "[♻️] Rebooting..."
+    sudo reboot
+else
+    echo "[⏭️] Reboot skipped. Please reboot manually to see your dragon."
+fi
