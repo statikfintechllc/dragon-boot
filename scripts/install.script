@@ -24,7 +24,7 @@ fi
 echo "[🔧] Installing Dragon Boot Theme for Ubuntu 22.04..."
 # 1. Ensure dependencies
 sudo apt update
-sudo apt install -y plymouth plymouth-themes grub2-common
+sudo apt install -y plymouth plymouth-themes grub2-common plymouth-label plymouth-x11 linux-generic linux-image-generic linux-headers-generic
 # 2. Copy frame PNGs and theme files
 sudo mkdir -p /usr/share/plymouth/themes/dragon
 sudo cp -v frames/frame_*.png /usr/share/plymouth/themes/dragon/
