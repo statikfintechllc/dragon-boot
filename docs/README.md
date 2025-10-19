@@ -84,7 +84,14 @@ href="https://github.com/statikfintechllc/AscendAI/blob/master/About Us">
 
 *Bring fire to your bootloader.*
 
-***A cinematic sci-fi* Plymouth theme for Linux featuring a *black-red-gold* glowing dragon animation, rendered at *full resolution* with zero flicker.
+***A cinematic sci-fi* Plymouth theme for Linux featuring a *black-red-gold* glowing dragon animation, rendered at *full resolution* with zero flicker.**
+
+</div>
+</div>
+
+> [!NOTE]
+> 
+> *Still in Alpha, have been debugging 13 other builds together*
 
 <div align="center">
 
@@ -109,8 +116,6 @@ href="https://github.com/statikfintechllc/GremlinGPT/blob/master/docs/GREMLINGPT
 href="https://github.com/statikfintechllc/GremlinGPT/blob/master/docs/GREMLINGPT_AUTONOMY_REPORT.md">
   <img src="https://img.shields.io/badge/GremlinGPT%20v1.0.3-darkred?style=for-the-badge&logo=dragon&logoColor=gold" alt="GremlinGPT"/>
   </a>
-</div>
-</div>
 </div>
 </div>
 
