@@ -161,6 +161,12 @@ sudo curl -fsSL https://raw.githubusercontent.com/statikfintechllc/dragon-boot/m
 >
 > **Testing without reboot:** Run `sudo ~/dragon-boot/scripts/test-theme.sh` for a preview
 
+> [!WARNING]
+>
+> **Seeing a black screen instead of the animation?** This is a known issue we're investigating!
+> Please [report your experience](https://github.com/statikfintechllc/dragon-boot/issues/new/choose) to help us fix it.
+> See the [Known Issues](#-known-issues) section below for troubleshooting steps.
+
 ---
 
 ## 🛠  What It Does
@@ -480,8 +486,34 @@ This theme works best on:
 
 ## ❌ Known Issues
 
-- Windows Boot Logo: If dual booting, some UEFI systems may show the Windows logo due to BGRT fallback. The theme disables BGRT, but some firmware may ignore it.  
-- Low-res Scaling: On older BIOS systems, animation may downscale or stutter.
+### Black Screen During Boot (INVESTIGATING)
+**If the install completes but you see a black screen instead of the dragon animation**, you're not alone! This is a known issue we're actively investigating.
+
+**📝 Help Us Fix It:**
+- [Report Your Experience](https://github.com/statikfintechllc/dragon-boot/issues/new/choose) - Use the "Boot Theme Not Working" template
+- [View Investigation Guide](../.github/ISSUE_BOOT_THEME_NOT_WORKING.md) - Comprehensive debugging information
+- [Contributing Guide](../.github/CONTRIBUTING.md) - Learn how to help solve this
+
+**Quick Diagnostics:**
+```bash
+# Check if Plymouth is working
+sudo journalctl -b | grep -i plymouth
+
+# Verify theme is registered
+update-alternatives --list default.plymouth
+
+# Test without rebooting
+sudo plymouthd --debug --no-daemon &
+sudo plymouth --show-splash
+# Wait 5 seconds then:
+sudo plymouth --quit
+```
+
+See the [Troubleshooting Guide](TROUBLESHOOTING.md) for detailed diagnostic steps.
+
+### Other Known Issues
+- **Windows Boot Logo:** If dual booting, some UEFI systems may show the Windows logo due to BGRT fallback. The theme disables BGRT, but some firmware may ignore it.  
+- **Low-res Scaling:** On older BIOS systems, animation may downscale or stutter.
 
 ---
 
