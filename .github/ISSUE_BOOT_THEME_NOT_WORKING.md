@@ -47,8 +47,8 @@ The theme should display a cinematic glowing dragon animation during boot on UEF
    - Total of ~50MB of animation assets
 
 3. **Theme Configuration Files**
-   - `usr/share/plymouth/dragon/dragon.plymouth` - Theme metadata
-   - `usr/share/plymouth/dragon/dragon.script` - Animation script (126 lines)
+   - `usr/share/plymouth/themes/dragon/dragon.plymouth` - Theme metadata
+   - `usr/share/plymouth/themes/dragon/dragon.script` - Animation script (126 lines)
    - `etc/plymouth/plymouthd.conf` - Daemon configuration
 
 4. **Documentation**
