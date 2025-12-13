@@ -60,7 +60,7 @@ git checkout -b feature/descriptive-name
 ```
 
 ### 3. Make Your Changes
-- **For theme script changes:** Edit `usr/share/plymouth/dragon/dragon.script`
+- **For theme script changes:** Edit `usr/share/plymouth/themes/dragon/dragon.script`
 - **For installation fixes:** Edit `scripts/install.script`
 - **For documentation:** Edit files in `docs/`
 - **For animation:** Modify PNG files in `frames/` (maintain 24 frames)
