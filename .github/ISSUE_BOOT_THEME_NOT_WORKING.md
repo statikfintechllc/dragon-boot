@@ -134,7 +134,7 @@ Based on the troubleshooting guide, possible causes include:
    - Plymouth may be reverting to fallback theme
 
 5. **File Path Issues**
-   - Duplicate theme directories exist (`usr/share/plymouth/themes/dragon/` and `usr/share/plymouth/dragon/`)
+   - Duplicate theme directories exist (`/usr/share/plymouth/themes/dragon/` and `/usr/share/plymouth/dragon/`)
    - Installation may be copying to wrong location
    - Script `ImageDir` variable may not match actual file locations
 
