@@ -122,7 +122,7 @@ lsinitramfs /boot/initrd.img-$(uname -r) | grep dragon
 
 ## Need Help?
 
-- Check the [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
+- Check the [Troubleshooting Guide](../docs/TROUBLESHOOTING.md)
 - Read the [Contributing Guide](CONTRIBUTING.md)
 - Look at existing issues for similar problems
 
