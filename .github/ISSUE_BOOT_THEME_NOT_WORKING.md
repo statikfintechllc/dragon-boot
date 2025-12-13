@@ -216,8 +216,8 @@ Based on the troubleshooting guide, possible causes include:
 
 - **Repository Files:**
   - Installation script: `scripts/install.script`
-  - Theme script: `usr/share/plymouth/dragon/dragon.script`
-  - Theme definition: `usr/share/plymouth/dragon/dragon.plymouth`
+  - Theme script: `usr/share/plymouth/themes/dragon/dragon.script`
+  - Theme definition: `usr/share/plymouth/themes/dragon/dragon.plymouth`
   - Troubleshooting guide: `docs/TROUBLESHOOTING.md`
 
 - **External Documentation:**
