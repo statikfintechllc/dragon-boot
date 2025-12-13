@@ -38,7 +38,7 @@ Dragon Boot is a distribution project (theme files + installation scripts), not 
 dragon-boot/
 ├── frames/                    # 24 PNG animation frames
 ├── scripts/                   # Installation and testing scripts
-├── usr/share/plymouth/dragon/ # Plymouth theme files
+├── usr/share/plymouth/themes/dragon/ # Plymouth theme files
 ├── etc/plymouth/              # Plymouth configuration
 └── docs/                      # Documentation
 ```
