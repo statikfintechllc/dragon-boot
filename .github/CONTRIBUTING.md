@@ -8,7 +8,7 @@ This guide will help you get started with contributing to this Plymouth boot the
 
 Before creating a new issue, please:
 1. Check existing [issues](https://github.com/statikfintechllc/dragon-boot/issues) to avoid duplicates
-2. Read the [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
+2. Read the [Troubleshooting Guide](../docs/TROUBLESHOOTING.md)
 3. Use the appropriate issue template:
    - **Boot Theme Not Working** - For black screen issues during boot
    - **Bug Report** - For other bugs or unexpected behavior
