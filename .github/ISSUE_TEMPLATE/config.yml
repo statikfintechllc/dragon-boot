@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/statikfintechllc/dragon-boot/tree/master/docs
+    about: Check the documentation for installation and troubleshooting guides
+  - name: 💬 Ask a Question
+    url: https://github.com/statikfintechllc/dragon-boot/discussions
+    about: Ask questions and discuss ideas with the community
